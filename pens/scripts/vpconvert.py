@@ -144,28 +144,22 @@ def convert(vpl,out,format,pen,args,verb=True):
                               options='color=y fat=1 fatmult=1.5 ' + args)
         # Check for available EPS to PDF converters and use correct syntax for each
         epstopdf = which('epstopdf')
-        a2ping = which('a2ping') 
-        convert_cmd = which('convert')  # Use different name to avoid shadowing the earlier 'convert' variable
+        converter = which('a2ping') or which('convert')  # a2ping and convert use same syntax
         
         if epstopdf:
             # epstopdf uses --outfile= syntax
             command = 'LD_LIBRARY_PATH=%s GS_OPTIONS="%s" %s %s --outfile=%s' \
                 % (os.environ.get('LD_LIBRARY_PATH',''),
                    os.environ.get('GS_OPTIONS',''),epstopdf,eps,out)
-            print(command)
-            fail = os.system(command)
-        elif a2ping:
-            # a2ping uses: a2ping input.eps output.pdf
+        elif converter:
+            # a2ping and convert both use: program input.eps output.pdf
             command = 'LD_LIBRARY_PATH=%s GS_OPTIONS="%s" %s %s %s' \
                 % (os.environ.get('LD_LIBRARY_PATH',''),
-                   os.environ.get('GS_OPTIONS',''),a2ping,eps,out)
-            print(command)
-            fail = os.system(command)
-        elif convert_cmd:
-            # convert uses: convert input.eps output.pdf  
-            command = 'LD_LIBRARY_PATH=%s GS_OPTIONS="%s" %s %s %s' \
-                % (os.environ.get('LD_LIBRARY_PATH',''),
-                   os.environ.get('GS_OPTIONS',''),convert_cmd,eps,out)
+                   os.environ.get('GS_OPTIONS',''),converter,eps,out)
+        else:
+            fail = True
+            
+        if epstopdf or converter:
             print(command)
             fail = os.system(command)
         else:
